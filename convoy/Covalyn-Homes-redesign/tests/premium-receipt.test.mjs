@@ -1,0 +1,12 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {receiptPdf} from '../server/pdf-receipt.mjs';
+import {readFileSync} from 'node:fs';
+import {matchingTotp} from '../server/totp.mjs';
+const example={receiptId:'CVH-P-12345678',date:'2026-11-09',name:'Example customer',description:'Service invoice',method:'PayPal',reference:'CAPTURE-EXAMPLE',amountCents:5500,status:'PAID',isExternal:false};
+test('generates a one-page PDF with correct PDF structure',()=>{const out=receiptPdf(example).toString('utf8');assert.match(out,/^%PDF-1.4/);assert.match(out,/startxref/);assert.match(out,/\/Type \/Catalog/);assert.match(out,/\/Type \/Page/);assert.match(out,/%%EOF/);});
+test('receipt carries verified payment language and organizational marks',()=>{const s=receiptPdf(example).toString('utf8');for(const word of ['COVALYN','HOMES','PAYMENT RECEIPT','Covalyn Homes Billing Office','USD 55.00','CAPTURE-EXAMPLE','Not an escrow','infocovalyn@gmail.com'])assert.ok(s.includes(word),word)});
+test('external record PDF explicitly disclaims independent bank or escrow verification',()=>{const s=receiptPdf({...example,isExternal:true,status:'EXTERNAL RECORD'}).toString('utf8');assert.ok(s.includes('not independent bank or escrow confirmation'));});
+test('refunded PDF shows refunded state',()=>{const s=receiptPdf({...example,status:'REFUNDED'}).toString('utf8');assert.ok(s.includes('REFUNDED'));assert.ok(s.includes('later refunded'));});
+test('text from user fields is escaped in PDF content stream',()=>{const s=receiptPdf({...example,name:'User (Name)'}).toString('utf8');assert.ok(s.includes('User \\(Name\\)'));});
+test('source has no video-consultation or AI assistant integration',()=>{const app=readFileSync(new URL('../public/app.js',import.meta.url),'utf8');assert.equal(/(?:ai assistant|video consultations|api\/ai\/)/i.test(app),false);});
