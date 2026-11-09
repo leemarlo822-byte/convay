@@ -1,0 +1,14 @@
+{
+  "name": "Covalyn Homes",
+  "short_name": "Covalyn",
+  "description": "Homes, private transaction progress, secure property records and verified receipts.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#141e17",
+  "theme_color": "#141e17",
+  "icons": [
+    {"src":"/app-icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},
+    {"src":"/app-icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
+  ]
+}
